@@ -8,7 +8,6 @@ const ignoredProperties = new Set([
 function clean(ast, newObj, parent) {
   // for codeblock
   if (
-    ast.type === "front-matter" ||
     ast.type === "code" ||
     ast.type === "yaml" ||
     ast.type === "import" ||

@@ -36,12 +36,21 @@ function transformInlineCode(ast) {
 }
 
 function restoreUnescapedCharacter(ast, options) {
-  return mapAst(ast, (node) =>
-    node.type !== "text" ||
-    node.value === "*" ||
-    node.value === "_" || // handle these cases in printer
-    !isSingleCharRegex.test(node.value) ||
-    node.position.end.offset - node.position.start.offset === node.value.length
+  return mapAst(ast, (node) => {
+    if (node.type !== "text") {
+      return node;
+    }
+    if (node.value !== "*" || node.value !== "_") {
+      return node;
+    }
+    if (!isSingleCharRegex.test(node.value)) {
+      return node;
+    }
+    if (!node.position) {
+      return node;
+    }
+    return node.position.end.offset - node.position.start.offset ===
+      node.value.length
       ? node
       : {
           ...node,
@@ -49,8 +58,8 @@ function restoreUnescapedCharacter(ast, options) {
             node.position.start.offset,
             node.position.end.offset
           ),
-        }
-  );
+        };
+  });
 }
 
 function mergeContinuousImportExport(ast) {
@@ -130,13 +139,9 @@ function splitTextIntoSentences(ast, options) {
 function transformIndentedCodeblockAndMarkItsParentList(ast, options) {
   return mapAst(ast, (node, index, parentStack) => {
     if (node.type === "code") {
+      const start = options.originalText[node.position.start.offset];
       // the first char may point to `\n`, e.g. `\n\t\tbar`, just ignore it
-      const isIndented = /^\n?(?: {4,}|\t)/.test(
-        options.originalText.slice(
-          node.position.start.offset,
-          node.position.end.offset
-        )
-      );
+      const isIndented = start === " " || start === "\t";
 
       node.isIndented = isIndented;
 

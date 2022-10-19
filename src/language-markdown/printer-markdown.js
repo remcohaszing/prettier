@@ -73,7 +73,7 @@ function genericPrint(path, options, print) {
   }
 
   switch (node.type) {
-    case "front-matter":
+    case "yaml":
       return options.originalText.slice(
         node.position.start.offset,
         node.position.end.offset
@@ -185,20 +185,10 @@ function genericPrint(path, options, print) {
       return ["[[", contents, "]]"];
     }
     case "link":
+      if (!node.position) {
+        return ["<", printChildren(path, options, print), ">"];
+      }
       switch (options.originalText[node.position.start.offset]) {
-        case "<": {
-          const mailto = "mailto:";
-          const url =
-            // <hello@example.com> is parsed as { url: "mailto:hello@example.com" }
-            node.url.startsWith(mailto) &&
-            options.originalText.slice(
-              node.position.start.offset + 1,
-              node.position.start.offset + 1 + mailto.length
-            ) !== mailto
-              ? node.url.slice(mailto.length)
-              : node.url;
-          return ["<", url, ">"];
-        }
         case "[":
           return [
             "[",
@@ -801,10 +791,10 @@ function shouldPrePrintDoubleHardline(node, data) {
   const isSiblingNode = isSequence && SIBLING_NODE_TYPES.has(node.type);
 
   const isInTightListItem =
-    data.parentNode.type === "listItem" && !data.parentNode.loose;
+    data.parentNode.type === "listItem" && !data.parentNode.spread;
 
   const isPrevNodeLooseListItem =
-    data.prevNode?.type === "listItem" && data.prevNode.loose;
+    data.prevNode?.type === "listItem" && data.prevNode.spread;
 
   const isPrevNodePrettierIgnore = isPrettierIgnore(data.prevNode) === "next";
 

@@ -1,15 +1,16 @@
-import remarkParse from "remark-parse";
-import unified from "unified";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import footnotes from "remark-footnotes";
+import remarkParse from "remark-parse";
+import { unified } from "unified";
 import { hasPragma } from "./pragma.js";
 import { locStart, locEnd } from "./loc.js";
 import { BLOCKS_REGEX, esSyntax } from "./mdx.js";
-import htmlToJsx from "./unified-plugins/html-to-jsx.js";
-import frontMatter from "./unified-plugins/front-matter.js";
-import liquid from "./unified-plugins/liquid.js";
-import wikiLink from "./unified-plugins/wiki-link.js";
-import looseItems from "./unified-plugins/loose-items.js";
+// import htmlToJsx from "./unified-plugins/html-to-jsx.js";
+// import frontMatter from "./unified-plugins/front-matter.js";
+// import liquid from "./unified-plugins/liquid.js";
+// import wikiLink from "./unified-plugins/wiki-link.js";
+// import looseItems from "./unified-plugins/loose-items.js";
 
 /**
  * based on [MDAST](https://github.com/syntax-tree/mdast) with following modifications:
@@ -28,18 +29,16 @@ import looseItems from "./unified-plugins/loose-items.js";
 function createParse({ isMDX }) {
   return (text) => {
     const processor = unified()
-      .use(remarkParse, {
-        commonmark: true,
-        ...(isMDX && { blocks: [BLOCKS_REGEX] }),
-      })
-      .use(footnotes)
-      .use(frontMatter)
-      .use(remarkMath)
-      .use(isMDX ? esSyntax : identity)
-      .use(liquid)
-      .use(isMDX ? htmlToJsx : identity)
-      .use(wikiLink)
-      .use(looseItems);
+      .use(remarkParse)
+      .use(remarkFrontmatter)
+      .use(remarkGfm)
+      // .use(frontMatter)
+      .use(remarkMath);
+    // .use(isMDX ? esSyntax : identity);
+    // .use(liquid)
+    // .use(isMDX ? htmlToJsx : identity)
+    // .use(wikiLink)
+    // .use(looseItems);
     return processor.run(processor.parse(text));
   };
 }

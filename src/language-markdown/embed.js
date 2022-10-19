@@ -40,7 +40,7 @@ function embed(path, options) {
   }
 
   switch (node.type) {
-    case "front-matter":
+    case "yaml":
       return (textToDoc) => printFrontMatter(node, textToDoc);
 
     // MDX
